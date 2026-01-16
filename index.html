@@ -834,6 +834,12 @@
             if (percentage >= 25) return "moderate";
             return "safe";
         }
+        setInterval(() => {
+  if (selectedState) {
+    fetchAllDisasters();
+  }
+}, 60000); // every 60 seconds
+
     </script>
 </body>
 </html>
