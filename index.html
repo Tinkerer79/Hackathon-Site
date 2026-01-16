@@ -626,60 +626,66 @@
     }
 
     function displayResults(data) {
-        const mainCard = document.getElementById('main-card');
+    const mainCard = document.getElementById('main-card');
 
-        // Region and time
-        document.getElementById('region-name').textContent = data.region;
-        const date = new Date(data.timestamp);
-        document.getElementById('timestamp').textContent = `Last updated: ${date.toLocaleString('en-IN')}`;
+    // Region and time
+    document.getElementById('region-name').textContent = data.region || 'Unknown Region';
+    const date = new Date(data.timestamp);
+    document.getElementById('timestamp').textContent = `Last updated: ${date.toLocaleString('en-IN')}`;
 
-        // Primary disaster
-        const primaryDisaster = document.getElementById('primary-disaster');
-        let emoji = '⚠️';
-        if (data.primary_disaster === 'FLOOD') emoji = '🌊';
-        else if (data.primary_disaster === 'HEATWAVE') emoji = '🔥';
-        else if (data.primary_disaster === 'NORMAL') emoji = '✅';
+    // Primary disaster
+    const primaryDisaster = document.getElementById('primary-disaster');
+    let emoji = '⚠️';
+    let disaster = data.primary_disaster || 'UNKNOWN';
+    console.log('primary_disaster:', disaster);
 
-        primaryDisaster.textContent = `${emoji} ${data.primary_disaster}`;
-        primaryDisaster.className = `primary-disaster ${data.primary_disaster.toLowerCase()}`;
+    if (disaster === 'FLOOD') emoji = '🌊';
+    else if (disaster === 'HEATWAVE') emoji = '🔥';
+    else if (disaster === 'NORMAL') emoji = '✅';
 
-        // Risk badge
-        const badge = document.getElementById('risk-badge');
-        badge.textContent = data.risk_level;
-        badge.className = `risk-level-badge ${data.risk_level.toLowerCase()}`;
+    primaryDisaster.textContent = `${emoji} ${disaster}`;
+    primaryDisaster.className = `primary-disaster ${String(disaster).toLowerCase()}`;
 
-        // Metrics
-        const floodPercent = (data.flood_risk * 100).toFixed(0);
-        const heatPercent = (data.heat_risk * 100).toFixed(0);
+    // Risk badge
+    const badge = document.getElementById('risk-badge');
+    let risk_level = data.risk_level || 'UNKNOWN';
+    console.log('risk_level:', risk_level);
 
-        document.getElementById('flood-risk').textContent = floodPercent + '%';
-        document.getElementById('heat-risk').textContent = heatPercent + '%';
-        document.getElementById('rainfall').innerHTML = `${data.rainfall_72h_mm}<span class="metric-unit">mm</span>`;
-        document.getElementById('max-temp').innerHTML = `${data.max_temperature}<span class="metric-unit">°C</span>`;
+    badge.textContent = risk_level;
+    badge.className = `risk-level-badge ${String(risk_level).toLowerCase()}`;
 
-        // Risk bars
-        document.getElementById('flood-bar').style.width = floodPercent + '%';
-        document.getElementById('heat-bar').style.width = heatPercent + '%';
+    // Metrics (with default fallback)
+    const floodPercent = data.flood_risk !== undefined ? (data.flood_risk * 100).toFixed(0) : '0';
+    const heatPercent = data.heat_risk !== undefined ? (data.heat_risk * 100).toFixed(0) : '0';
 
-        // Alert info
-        const infoSection = document.getElementById('info-section');
-        const alertText = document.getElementById('alert-text');
+    document.getElementById('flood-risk').textContent = floodPercent + '%';
+    document.getElementById('heat-risk').textContent = heatPercent + '%';
+    document.getElementById('rainfall').innerHTML = `${data.rainfall_72h_mm !== undefined ? data.rainfall_72h_mm : 0}<span class="metric-unit">mm</span>`;
+    document.getElementById('max-temp').innerHTML = `${data.max_temperature !== undefined ? data.max_temperature : 0}<span class="metric-unit">°C</span>`;
 
-        if (data.risk_level === 'EXTREME') {
-            infoSection.style.display = 'block';
-            alertText.textContent = '🚨 EXTREME RISK ALERT! Immediate precautions recommended. Check official disaster management authorities for guidance.';
-        } else if (data.risk_level === 'HIGH') {
-            infoSection.style.display = 'block';
-            alertText.textContent = '⚠️ HIGH RISK! Stay alert and monitor updates from official sources.';
-        } else {
-            infoSection.style.display = 'none';
-        }
+    // Risk bars
+    document.getElementById('flood-bar').style.width = floodPercent + '%';
+    document.getElementById('heat-bar').style.width = heatPercent + '%';
 
-        mainCard.classList.add('active');
+    // Alert info
+    const infoSection = document.getElementById('info-section');
+    const alertText = document.getElementById('alert-text');
 
-        // Populate all states
-        populateAllStates();
+    if (risk_level === 'EXTREME') {
+        infoSection.style.display = 'block';
+        alertText.textContent = '🚨 EXTREME RISK ALERT! Immediate precautions recommended. Check official disaster management authorities for guidance.';
+    } else if (risk_level === 'HIGH') {
+        infoSection.style.display = 'block';
+        alertText.textContent = '⚠️ HIGH RISK! Stay alert and monitor updates from official sources.';
+    } else {
+        infoSection.style.display = 'none';
     }
+
+    mainCard.classList.add('active');
+
+    // Populate all states
+    populateAllStates();
+}
 
     function populateAllStates() {
         const grid = document.getElementById('states-grid');
